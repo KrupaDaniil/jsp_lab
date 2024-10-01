@@ -1,0 +1,5 @@
+:is(#userQuotes, #editQuote) {
+    font-size: 13pt;
+    height: 15rem;
+    resize: none;
+}
