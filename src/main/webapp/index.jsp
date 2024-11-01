@@ -11,6 +11,19 @@
     int randomId = rnd.nextInt(1, db.getQuotesCount(0));
     Quotes quote = db.getQuote(randomId);
 
+    String isPost = "POST";
+
+    if (isPost.equalsIgnoreCase(request.getMethod())) {
+        String _quote = request.getParameter("quote");
+        String _author = request.getParameter("author");
+        String _categoryId = request.getParameter("categoryId");
+
+        if (_quote != null && !_quote.isBlank() && _author != null && !_author.isBlank() && _categoryId != null && !_categoryId.isBlank()) {
+            int categoryId = Integer.parseInt(_categoryId);
+
+            db.addQuote(new Quotes(_quote, _author, categoryId));
+        }
+    }
 %>
 <!doctype html>
 <html lang="en">
@@ -35,7 +48,7 @@
                             <% if (categories != null && !categories.isEmpty()) {
                                 for(Categories category : categories) {%>
                             <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="categoryName" id="<%=category.getId()%>" value="<%=category.getId()%>">
+                                <input type="radio" class="form-check-input" name="categoryId" id="<%=category.getId()%>" value="<%=category.getId()%>">
                                 <label for="<%=category.getId()%>" class="form-check-label"><%=category.getCategoryName()%></label>
                             </div>
                             <%}
@@ -64,6 +77,9 @@
                 </form>
             </div>
             <div class="card-body">
+                <div class="d-flex align-items-center justify-content-end mb-3">
+                    <button type="button" class="btn btn-sm btn-close" data-bs-toggle="modal" data-bs-target="#deleteQuoteModal"></button>
+                </div>
                 <div class="fs-5 mb-3"><%=quote.getQuote()%></div>
                 <div class="text-end fs-6 fw-semibold fst-italic"><%=quote.getAuthor()%></div>
             </div>
@@ -103,9 +119,7 @@
                         <input type="text" class="form-control form-control-sm mb-3" name="author" placeholder="Enter author" aria-label="Enter author">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-outline-danger px-3 me-2" data-bs-dismiss="modal">
-                            Close
-                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger px-3 me-2" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-sm btn-outline-success px-3">Save</button>
                     </div>
                 </form>
@@ -141,8 +155,29 @@
                         <input type="text" class="form-control form-control-sm mb-3" name="author" placeholder="Enter author" aria-label="Enter author" value="<%=quote.getAuthor()%>">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-outline-danger px-3 me-2" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger px-3 me-2" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-sm btn-outline-success px-3">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteQuoteModal" tabindex="-1" aria-labelledby="deleteQuoteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="deleteModalLabel">Delete quote</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" action="remove">
+                    <input type="hidden" name="id" value="<%=quote.getId()%>">
+                    <div class="modal-body mb-3">
+                        <div class="text-center fw-semibold fs-5">The entry will be deleted. Continue?</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-sm btn-outline-danger px-3">Delete</button>
+                        <button type="button" class="btn btn-sm btn-outline-warning px-3 me-2" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>

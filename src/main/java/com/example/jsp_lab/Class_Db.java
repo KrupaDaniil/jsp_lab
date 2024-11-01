@@ -106,6 +106,33 @@ public class Class_Db {
         return null;
     }
 
+    public List<Quotes> getQuotesByCategoryId(int categoryId) {
+        quotes = new ArrayList<>();
+        try {
+            Class.forName(driver);
+
+            try(Connection cn = DriverManager.getConnection(patch, uName, uPassword)) {
+                String cmd = "select * from Quotes where categoryId = ?";
+                PreparedStatement pr = cn.prepareStatement(cmd);
+                pr.setInt(1, categoryId);
+                ResultSet rs = pr.executeQuery();
+                while (rs.next()) {
+                    quotes.add(new Quotes(rs.getInt(1), rs.getString(2), rs.getString(3),
+                            rs.getInt(4)));
+                }
+
+                return quotes;
+
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+            }
+        } catch (ClassNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
+
     public int getQuotesCount(int categoryId) {
         int count = 0;
 
