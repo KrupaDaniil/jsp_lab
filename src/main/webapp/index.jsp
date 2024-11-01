@@ -1,4 +1,17 @@
+<%@ page import="com.example.jsp_lab.Class_Db" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.example.jsp_lab.Models.Categories" %>
+<%@ page import="java.util.Random" %>
+<%@ page import="com.example.jsp_lab.Models.Quotes" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%
+    Class_Db db = new Class_Db();
+    List<Categories> categories = db.getCategories();
+    Random rnd = new Random();
+    int randomId = rnd.nextInt(1, db.getQuotesCount(0));
+    Quotes quote = db.getQuote(randomId);
+
+%>
 <!doctype html>
 <html lang="en">
 <head>
@@ -19,22 +32,14 @@
                     <div class="row mb-3">
                         <div class="col">
                             <span class="fw-semibold me-2">Choose a category:</span>
+                            <% if (categories != null && !categories.isEmpty()) {
+                                for(Categories category : categories) {%>
                             <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="categoryName" id="edtCt">
-                                <label for="edtCt" class="form-check-label">Education</label>
+                                <input type="radio" class="form-check-input" name="categoryName" id="<%=category.getId()%>" value="<%=category.getId()%>">
+                                <label for="<%=category.getId()%>" class="form-check-label"><%=category.getCategoryName()%></label>
                             </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="categoryName" id="prsDvt">
-                                <label for="prsDvt" class="form-check-label">Personal development</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="categoryName" id="relationships">
-                                <label for="relationships" class="form-check-label">Relationships</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" class="form-check-input" name="categoryName" id="history">
-                                <label for="history" class="form-check-label">History</label>
-                            </div>
+                            <%}
+                            }%>
                         </div>
                     </div>
 
@@ -58,16 +63,23 @@
 
                 </form>
             </div>
+            <div class="card-body">
+                <div class="fs-5 mb-3"><%=quote.getQuote()%></div>
+                <div class="text-end fs-6 fw-semibold fst-italic"><%=quote.getAuthor()%></div>
+            </div>
+            <div class="card-footer bg-body">
+                <div class="d-flex align-items-center justify-content-end px-3">
+                    <button type="button" class="btn btn-sm btn-success me-2" data-bs-toggle="modal"
+                            data-bs-target="#editQuoteModal">Edit Quote</button>
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                            data-bs-target="#addQuoteModal">Add Quote</button>
+                </div>
+
+            </div>
         </div>
     </div>
 
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editQuoteModal">
-        Launch demo modal
-    </button>
 
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQuoteModal">
-        Launch demo modal
-    </button>
 
     <div class="modal fade" id="addQuoteModal" tabindex="-1" aria-labelledby="addQuoteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -78,8 +90,17 @@
                 </div>
                 <form method="post">
                     <div class="modal-body mb-3">
-                        <label for="userQuotes" class="form-label"></label>
-                        <textarea name="userQuote" class="form-control" id="userQuotes"></textarea>
+                        <select name="categoryId" aria-label="Select category" class="form-select form-select-sm mb-3">
+                            <option value="" hidden="hidden" selected>Select a category</option>
+                            <%
+                                if (categories != null && !categories.isEmpty()) {
+                                    for(Categories category : categories) {%>
+                                    <option value="<%=category.getId()%>"><%=category.getCategoryName()%></option>
+                            <%}}%>
+                        </select>
+
+                        <textarea name="quote" class="form-control mb-3" placeholder="Enter quote" aria-label="Enter quote"></textarea>
+                        <input type="text" class="form-control form-control-sm mb-3" name="author" placeholder="Enter author" aria-label="Enter author">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-outline-danger px-3 me-2" data-bs-dismiss="modal">
@@ -100,15 +121,27 @@
                     <h1 class="modal-title fs-5" id="updateModalLabel">Updating the quote</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="post">
+                <form method="post" action="edit">
                     <div class="modal-body mb-3">
-                        <label for="editQuote" class="form-label"></label>
-                        <textarea name="editUserQuote" class="form-control" id="editQuote"></textarea>
+                        <input type="hidden" name="id" value="<%=quote.getId()%>">
+                        <select name="categoryId" aria-label="Select category" class="form-select form-select-sm mb-3">
+                            <option value="" hidden="hidden" selected>Select a category</option>
+                            <%
+                                if (categories != null && !categories.isEmpty()) {
+                                    for(Categories category : categories) {%>
+                            <%if (category.getId() == quote.getCategoryId()) {%>
+                            <option value="<%=category.getId()%>" selected><%=category.getCategoryName()%></option>
+                            <%} else {%>
+                            <option value="<%=category.getId()%>"><%=category.getCategoryName()%></option>
+                            <%}%>
+                            <%}}%>
+                        </select>
+
+                        <textarea name="quote" class="form-control mb-3" placeholder="Enter quote" aria-label="Enter quote"><%=quote.getQuote()%></textarea>
+                        <input type="text" class="form-control form-control-sm mb-3" name="author" placeholder="Enter author" aria-label="Enter author" value="<%=quote.getAuthor()%>">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-sm btn-outline-danger px-3 me-2" data-bs-dismiss="modal">
-                            Close
-                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger px-3 me-2" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-sm btn-outline-success px-3">Save</button>
                     </div>
                 </form>
